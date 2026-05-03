@@ -1,0 +1,38 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  padding: 16px; /* Added padding to give the sketchbook some margin */
+}
+
+.heatmap-container {
+  flex: 1;
+  position: relative;
+  /* Sketched container for the bubbles */
+  background-color: var(--bg-ocean);
+  border: 4px solid var(--fg-pencil);
+  border-radius: var(--border-wobbly);
+  box-shadow: var(--shadow-hard);
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 8px; /* Less margin on mobile */
+  }
+
+  .heatmap-container {
+    border-width: 2px;
+    box-shadow: 2px 2px 0px 0px var(--shadow-color);
+  }
+}

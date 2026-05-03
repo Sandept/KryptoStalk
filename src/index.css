@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg-paper: #fdfbf7;
+  --bg-postit: #fff9c4;
+  --bg-ocean: #f4e7d3; /* Light white coffee color */
+  --fg-pencil: #2d2d2d;
+  --fg-muted: #e5e0d8;
+  --tape-bg: rgba(0,0,0,0.1);
+  
+  --accent-red: #ff4d4d;
+  --accent-blue: #2d5da1;
+  --color-bullish: #34C759;
+  --color-bearish: #FF3B30;
+
+  --font-heading: 'Kalam', cursive;
+  --font-body: 'Patrick Hand', cursive;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* The signature Hand-Drawn wobbly border */
+  --border-wobbly: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --border-wobbly-alt: 15px 225px 15px 255px / 255px 15px 225px 15px;
+
+  /* Hard offset shadows - no blur */
+  --shadow-color: #2d2d2d;
+  --shadow-hard: 4px 4px 0px 0px var(--shadow-color);
+  --shadow-hard-lg: 8px 8px 0px 0px var(--shadow-color);
+  --shadow-active: 0px 0px 0px 0px var(--shadow-color);
+}
+
+[data-theme="dark"] {
+  --bg-paper: #1c1c1c;
+  --bg-postit: #2a2a2a;
+  --bg-ocean: #242424; /* Dark grey ocean for dark mode */
+  --fg-pencil: #e5e5e5;
+  --fg-muted: #3d3d3d;
+  --shadow-color: #000000;
+  --tape-bg: rgba(255,255,255,0.15);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-paper);
+  color: var(--fg-pencil);
+  line-height: 1.5;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  
+  /* Paper dot texture */
+  background-image: radial-gradient(var(--fg-muted) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--fg-pencil);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Scrollbar styling - sketched look */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-paper);
+  border-left: 2px dashed var(--fg-pencil);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fg-pencil);
+  border: 2px solid var(--bg-paper);
+  border-radius: var(--border-wobbly);
+}
+
+/* Utility classes */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.text-bullish {
+  color: var(--color-bullish);
+  font-weight: bold;
+}
+
+.text-bearish {
+  color: var(--color-bearish);
+  font-weight: bold;
+}
+
+/* Sketched UI Components */
+.sketched-box {
+  background-color: var(--bg-paper);
+  border: 3px solid var(--fg-pencil);
+  border-radius: var(--border-wobbly);
+  box-shadow: var(--shadow-hard);
+  transition: transform 0.1s, box-shadow 0.1s, background-color 0.3s;
+}
+
+.sketched-box:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hard-lg);
+}
+
+.sketched-box:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-active);
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}

@@ -209,37 +209,38 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
         // Project the centroid
         const projCoords = projection(d.centroid);
         
-        // Visibility check: If projected coordinates exist AND the point is on the front hemisphere
-        // D3 projection returns null if clipped by clipAngle(90) in some configs, 
-        // but checking distance from center of sphere is safer.
         let isVisible = false;
+        let projArea = 0;
+        
         if (projCoords) {
-           // We can manually check if it's on the front using geoDistance
-           // Rotation is [lamda, phi, gamma]. We need the center of projection in spherical coords:
            const centerLonLat = projection.invert([width/2, height/2]);
            if (centerLonLat) {
              const dist = d3.geoDistance(centerLonLat, d.centroid);
-             isVisible = dist < Math.PI / 2; // less than 90 degrees away
+             isVisible = dist < Math.PI / 2.1; // Hide slightly before the exact edge to avoid edge clipping
            }
         }
         
         const g = d3.select(this);
         if (isVisible && projCoords) {
+          projArea = pathGenerator.area(d.feature);
+          
           g.attr('transform', `translate(${projCoords[0]}, ${projCoords[1]})`)
            .style('display', 'block');
            
-          // Only render text if the polygon area is large enough (to avoid clutter)
-          if (d.feature.properties.area > 0.05) {
+          // Only render text if the projected area on screen is large enough
+          if (projArea > 1500) {
+             const baseSize = Math.sqrt(projArea) / 3.5; // Dynamic sizing based on pixel area
+             
              g.select('.label-symbol')
               .text(d.coin.symbol)
-              .style('font-size', Math.max(12, Math.min(32, d.feature.properties.area * 500)) + 'px');
+              .style('font-size', Math.max(10, Math.min(26, baseSize)) + 'px');
               
              g.select('.label-change')
               .text(() => {
                  const liveCoin = latestCoins.current.find(c => c.id === d.coin.id) || d.coin;
                  return `${liveCoin.change24h > 0 ? '+' : ''}${liveCoin.change24h.toFixed(1)}%`;
               })
-              .style('font-size', Math.max(10, Math.min(20, d.feature.properties.area * 300)) + 'px');
+              .style('font-size', Math.max(8, Math.min(16, baseSize * 0.6)) + 'px');
           } else {
              g.select('.label-symbol').text('');
              g.select('.label-change').text('');

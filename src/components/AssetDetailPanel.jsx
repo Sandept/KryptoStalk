@@ -77,6 +77,8 @@ const AssetDetailPanel = ({ asset, onClose, currency = 'usd' }) => {
       <div className="sketched-box" style={styles.panel}>
         <button style={styles.closeBtn} onClick={handleClose}>X</button>
         
+        {isMobile && <div style={styles.grabBar}></div>}
+
         <div style={styles.header}>
           <div style={styles.tack}></div>
           <div style={styles.titleRow}>
@@ -278,6 +280,14 @@ const styles = {
     color: 'var(--fg-pencil)',
     fontSize: '16px',
     marginLeft: '8px',
+  },
+  grabBar: {
+    width: '40px',
+    height: '6px',
+    backgroundColor: 'var(--fg-pencil)',
+    borderRadius: '3px',
+    margin: '0 auto 20px auto',
+    opacity: 0.3,
   }
 };
 

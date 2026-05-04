@@ -28,13 +28,13 @@ const TerminalHeader = ({ coins, globeStyle, setGlobeStyle, currency, setCurrenc
       <div style={headerStyle}>
         <div style={isMobile ? styles.logoContainerMobile : styles.logoContainer}>
           <div 
-            style={{...styles.logoMark, cursor: 'pointer'}} 
+            style={{...styles.logoMark, cursor: 'pointer', width: isMobile ? '40px' : '32px', height: isMobile ? '40px' : '32px'}} 
             onClick={() => window.location.reload()}
             title="Refresh Web App"
           >
             ₿
           </div>
-          {!isMobile && <h1 style={styles.title}>KryptoStalk</h1>}
+          <h1 style={{...styles.title, fontSize: isMobile ? '20px' : '28px'}}>KryptoStalk</h1>
         </div>
         
         {!isMobile && (
@@ -111,7 +111,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    width: '220px',
+    flexShrink: 0,
   },
   logoContainerMobile: {
     display: 'flex',
@@ -184,11 +184,13 @@ const styles = {
     justifyContent: 'center',
     position: 'relative',
     height: '40px',
-    padding: '0 10px',
+    padding: '0 8px',
     backgroundColor: 'var(--bg-postit)',
     border: '2px solid var(--fg-pencil)',
     borderRadius: 'var(--border-wobbly)',
     transform: 'rotate(2deg)',
+    flexShrink: 0,
+    gap: '4px',
   },
   tapeStrip: {
     position: 'absolute',

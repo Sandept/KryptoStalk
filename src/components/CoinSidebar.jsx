@@ -58,8 +58,8 @@ const CoinSidebar = ({ coins, onFocusCoin }) => {
 const styles = {
   container: {
     position: 'absolute',
-    top: '20px',
-    left: '20px',
+    top: '15px',
+    left: '15px',
     zIndex: 10,
     display: 'flex',
     flexDirection: 'column',
@@ -107,7 +107,7 @@ const styles = {
   listItem: {
     display: 'flex',
     alignItems: 'center',
-    padding: '8px',
+    padding: '12px 8px', // Increased vertical padding for mobile
     cursor: 'pointer',
     borderRadius: '8px',
     transition: 'background-color 0.2s',

@@ -265,7 +265,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default', focusCoin })
              
              g.select('.label-symbol')
               .text(d.coin.symbol)
-              .style('font-size', Math.max(10, Math.min(26, baseSize)) + 'px');
+              .style('font-size', Math.max(12, Math.min(26, baseSize)) + 'px');
               
              g.select('.label-change')
               .text(() => {

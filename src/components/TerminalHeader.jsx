@@ -27,7 +27,13 @@ const TerminalHeader = ({ coins, globeStyle, setGlobeStyle, currency, setCurrenc
     <header style={styles.headerWrapper}>
       <div style={headerStyle}>
         <div style={isMobile ? styles.logoContainerMobile : styles.logoContainer}>
-          <div style={styles.logoMark}>!</div>
+          <div 
+            style={{...styles.logoMark, cursor: 'pointer'}} 
+            onClick={() => window.location.reload()}
+            title="Refresh Web App"
+          >
+            ₿
+          </div>
           {!isMobile && <h1 style={styles.title}>KryptoStalk</h1>}
         </div>
         

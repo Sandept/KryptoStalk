@@ -8,6 +8,7 @@
   --fg-pencil: #2d2d2d;
   --fg-muted: #e5e0d8;
   --tape-bg: rgba(0,0,0,0.1);
+  --globe-stroke: #2d2d2d;
   
   --accent-red: #ff4d4d;
   --accent-blue: #2d5da1;
@@ -37,6 +38,7 @@
   --fg-muted: #3d3d3d;
   --shadow-color: #000000;
   --tape-bg: rgba(255,255,255,0.15);
+  --globe-stroke: #000000;
 }
 
 * {

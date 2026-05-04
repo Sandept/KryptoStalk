@@ -3,16 +3,19 @@ import './App.css'
 import TerminalHeader from './components/TerminalHeader'
 import Heatmap from './components/Heatmap'
 import AssetDetailPanel from './components/AssetDetailPanel'
+import CoinSidebar from './components/CoinSidebar'
 import { fetchMarketData } from './services/crypto'
 
 function App() {
+  const [rawCoins, setRawCoins] = useState([]);
   const [coins, setCoins] = useState([]);
   const [selectedCoin, setSelectedCoin] = useState(null);
+  const [focusCoin, setFocusCoin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [globeStyle, setGlobeStyle] = useState('default');
-  const [currency, setCurrency] = useState('usd');
-  const [exchangeRate, setExchangeRate] = useState(1);
+  const [currency, setCurrency] = useState('inr'); // Set default to 'inr'
+  const [exchangeRate, setExchangeRate] = useState(83); // Temporary default for INR
   const [theme, setTheme] = useState('light');
 
   // Apply theme to document
@@ -20,31 +23,32 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Fetch exchange rate whenever currency changes
+  const [rates, setRates] = useState({ USD: 1, EUR: 0.85, INR: 83 });
+
+  // Fetch exchange rates ONCE on mount
   useEffect(() => {
-    if (currency === 'usd') {
-      setExchangeRate(1);
-      return;
-    }
-    
     fetch('https://api.exchangerate-api.com/v4/latest/USD')
       .then(res => res.json())
       .then(data => {
-         const rate = data.rates[currency.toUpperCase()] || 1;
-         setExchangeRate(rate);
+         if (data && data.rates) {
+           setRates(data.rates);
+           setExchangeRate(data.rates[currency.toUpperCase()] || 1);
+         }
       })
-      .catch(err => {
-         console.error('Failed to fetch exchange rate:', err);
-         setExchangeRate(1); // fallback
-      });
-  }, [currency]);
+      .catch(err => console.error('Failed to fetch rates:', err));
+  }, []);
+
+  // Update exchangeRate synchronously when currency changes
+  useEffect(() => {
+    setExchangeRate(rates[currency.toUpperCase()] || 1);
+  }, [currency, rates]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const data = await fetchMarketData(currency);
-        setCoins(data);
+        const data = await fetchMarketData('usd'); // ALWAYS fetch in USD
+        setRawCoins(data);
         setError(null);
       } catch (err) {
         setError('Failed to load market data.');
@@ -58,18 +62,18 @@ function App() {
     // Refresh data every 2 minutes for new coins/sparklines (REST fallback)
     const interval = setInterval(loadData, 120000);
     return () => clearInterval(interval);
-  }, [currency]);
+  }, []); // Only run on mount!
 
   // Live WebSocket Integration for Real-Time Prices
   useEffect(() => {
-    if (coins.length === 0) return;
+    if (rawCoins.length === 0) return;
     
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/!ticker@arr');
     
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       
-      setCoins(prevCoins => {
+      setRawCoins(prevCoins => {
         // Create a fast lookup map for updates
         const priceUpdates = {};
         let hasChanges = false;
@@ -78,9 +82,8 @@ function App() {
           if (ticker.s.endsWith('USDT')) {
             const sym = ticker.s.replace('USDT', '');
             
-            // ticker.c is USD price. Multiply by exchangeRate to get selected currency live price!
             priceUpdates[sym] = {
-              price: parseFloat(ticker.c) * exchangeRate,
+              price: parseFloat(ticker.c), // Update USD price
               change24h: parseFloat(ticker.P)
             };
           }
@@ -102,7 +105,32 @@ function App() {
     return () => {
       ws.close();
     };
-  }, [coins.length, exchangeRate]); // Only re-run if the number of coins changes or exchange rate changes
+  }, [rawCoins.length]); // Re-run only if the number of coins changes
+
+  // Update display coins when rawCoins or exchangeRate changes
+  useEffect(() => {
+    if (rawCoins.length > 0) {
+      const displayCoins = rawCoins.map(coin => ({
+        ...coin,
+        price: coin.price * exchangeRate,
+        marketCap: coin.marketCap * exchangeRate,
+        volume: coin.volume * exchangeRate,
+        ath: coin.ath * exchangeRate,
+        sparkline: coin.sparkline ? coin.sparkline.map(p => p * exchangeRate) : []
+      }));
+      setCoins(displayCoins);
+    }
+  }, [rawCoins, exchangeRate]);
+
+  // Sync selectedCoin when coins data updates (e.g., currency change or live price update)
+  useEffect(() => {
+    if (selectedCoin && coins.length > 0) {
+      const updatedCoin = coins.find(c => c.id === selectedCoin.id);
+      if (updatedCoin && (updatedCoin.price !== selectedCoin.price || updatedCoin.change24h !== selectedCoin.change24h)) {
+        setSelectedCoin(updatedCoin);
+      }
+    }
+  }, [coins, selectedCoin]);
 
   // Animations are now managed in index.css
 
@@ -129,7 +157,10 @@ function App() {
               {error}
             </div>
           ) : (
-            <Heatmap coins={coins} onSelectCoin={setSelectedCoin} globeStyle={globeStyle} />
+            <>
+              <Heatmap coins={coins} onSelectCoin={setSelectedCoin} globeStyle={globeStyle} focusCoin={focusCoin} />
+              <CoinSidebar coins={coins} onFocusCoin={setFocusCoin} />
+            </>
           )}
         </div>
         

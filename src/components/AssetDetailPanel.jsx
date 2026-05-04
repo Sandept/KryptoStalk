@@ -4,6 +4,25 @@ import Sparkline from './Sparkline';
 const AssetDetailPanel = ({ asset, onClose, currency = 'usd' }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [liveSparkline, setLiveSparkline] = useState(asset ? asset.sparkline : []);
+
+  useEffect(() => {
+    if (asset && (!asset.sparkline || asset.sparkline.length === 0)) {
+       // Fetch 7D sparkline from Binance
+       fetch(`https://api.binance.com/api/v3/klines?symbol=${asset.symbol}USDT&interval=1d&limit=7`)
+         .then(res => res.json())
+         .then(data => {
+            if (Array.isArray(data)) {
+               const prices = data.map(candle => parseFloat(candle[4])); // closing price
+               setLiveSparkline(prices);
+            }
+         }).catch(err => {
+            console.error("Failed to fetch fallback sparkline", err);
+         });
+    } else if (asset) {
+       setLiveSparkline(asset.sparkline);
+    }
+  }, [asset]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -60,7 +79,10 @@ const AssetDetailPanel = ({ asset, onClose, currency = 'usd' }) => {
         
         <div style={styles.header}>
           <div style={styles.tack}></div>
-          <h2 style={styles.symbol}>{asset.symbol}</h2>
+          <div style={styles.titleRow}>
+            {asset.image && <img src={asset.image} alt={asset.name} style={styles.logo} />}
+            <h2 style={styles.symbol}>{asset.symbol}</h2>
+          </div>
           <span style={styles.name}>{asset.name}</span>
         </div>
 
@@ -74,7 +96,7 @@ const AssetDetailPanel = ({ asset, onClose, currency = 'usd' }) => {
         <div style={styles.chartContainer}>
           <h3 style={styles.sectionTitle}>7D Sketch</h3>
           <div style={styles.sparklineWrapper}>
-            <Sparkline data={asset.sparkline} width={300} height={100} color={arrowColor} />
+            <Sparkline data={liveSparkline} width={300} height={100} color={arrowColor} />
           </div>
         </div>
 
@@ -174,6 +196,18 @@ const styles = {
     marginBottom: '24px',
     borderBottom: '2px dashed var(--fg-pencil)',
     paddingBottom: '12px',
+  },
+  titleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '4px',
+  },
+  logo: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    border: '2px solid var(--fg-pencil)',
   },
   symbol: {
     margin: 0,

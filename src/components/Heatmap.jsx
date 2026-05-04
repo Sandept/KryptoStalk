@@ -21,11 +21,13 @@ function getFibonacciSpherePoints(n) {
   return points;
 }
 
-const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
+const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default', focusCoin }) => {
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [rotation, setRotation] = useState([0, -20, 0]);
+  const projectionRef = useRef(null);
+  const renderSceneRef = useRef(null);
   
   // Keep track of the latest coins without triggering full re-renders
   const latestCoins = useRef(coins);
@@ -35,19 +37,16 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
 
   // Handle resizing
   useEffect(() => {
-    if (containerRef.current) {
-      const { width, height } = containerRef.current.getBoundingClientRect();
-      setDimensions({ width, height });
-    }
     const handleResize = () => {
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
         setDimensions({ width, height });
       }
     };
+    handleResize(); // Run once immediately
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [coins && coins.length > 0]);
 
   // Compute Polygons and mapping ONLY when the actual list of coins changes, not their prices
   const coinIds = useMemo(() => coins ? coins.map(c => c.id).join(',') : '', [coins]);
@@ -104,19 +103,29 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
       .rotate(rotation)
       .clipAngle(90); // Clip anything behind the sphere
       
+    projectionRef.current = projection;
+      
     const pathGenerator = d3.geoPath().projection(projection);
 
-    // Setup Drag interaction
+    let inertiaTimer = null;
+    let velocity = [0, 0];
+
+    // Setup Drag interaction with Momentum (Smooth Roller)
     const drag = d3.drag()
+      .on('start', () => {
+        if (inertiaTimer) inertiaTimer.stop();
+        velocity = [0, 0];
+      })
       .on('drag', (event) => {
         const rotate = projection.rotate();
         const sensitivity = 0.25; // Drag sensitivity
         
-        const newRot = [
-          rotate[0] + event.dx * sensitivity,
-          rotate[1] - event.dy * sensitivity,
-          rotate[2]
-        ];
+        const dx = event.dx * sensitivity;
+        const dy = -event.dy * sensitivity;
+        
+        velocity = [dx, dy]; // Store instantaneous velocity
+        
+        const newRot = [rotate[0] + dx, rotate[1] + dy, rotate[2]];
         
         // Limit pitch to prevent flipping
         newRot[1] = Math.max(-80, Math.min(80, newRot[1]));
@@ -124,12 +133,35 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
         projection.rotate(newRot);
         setRotation(newRot);
         renderScene();
+      })
+      .on('end', () => {
+        const friction = 0.94; // Momentum falloff (0.0 to 1.0)
+        
+        inertiaTimer = d3.timer(() => {
+          velocity[0] *= friction;
+          velocity[1] *= friction;
+          
+          // Stop timer when velocity is negligible
+          if (Math.abs(velocity[0]) < 0.02 && Math.abs(velocity[1]) < 0.02) {
+             inertiaTimer.stop();
+             return;
+          }
+          
+          const rotate = projection.rotate();
+          const newRot = [rotate[0] + velocity[0], rotate[1] + velocity[1], rotate[2]];
+          newRot[1] = Math.max(-80, Math.min(80, newRot[1]));
+          
+          projection.rotate(newRot);
+          setRotation(newRot);
+          renderScene();
+        });
       });
       
     svg.call(drag);
     
     // Render function called on mount and on drag
     const renderScene = () => {
+      renderSceneRef.current = renderScene;
       // Create ocean base layer
       if (svg.select('.ocean').empty()) {
         // Insert before polygons to ensure it stays in the background
@@ -143,7 +175,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
       svg.select('.ocean path')
         .attr('d', pathGenerator)
         .attr('fill', 'var(--bg-paper)')
-        .attr('stroke', 'var(--fg-pencil)')
+        .attr('stroke', 'var(--globe-stroke)')
         .attr('stroke-width', 4)
         .attr('filter', 'url(#handDrawnShadow)');
 
@@ -161,7 +193,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
            const liveCoin = latestCoins.current.find(c => c.id === d.coin.id) || d.coin;
            return liveCoin.change24h >= 0 ? 'var(--color-bullish)' : 'var(--accent-red)';
         })
-        .attr('stroke', 'var(--fg-pencil)')
+        .attr('stroke', 'var(--globe-stroke)')
         .attr('stroke-width', globeStyle === 'origami' ? 2 : 3)
         .attr('stroke-linejoin', 'round')
         .attr('filter', 'url(#handDrawnShadow)')
@@ -275,10 +307,50 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
     */
     
     return () => {
-      // cancelAnimationFrame(raf);
+      if (inertiaTimer) inertiaTimer.stop();
     };
     
   }, [mappedData, dimensions]);
+
+  // Handle focusCoin to rotate globe smoothly
+  useEffect(() => {
+    if (!focusCoin || !mappedData || !projectionRef.current || !renderSceneRef.current) return;
+    
+    const targetData = mappedData.find(d => d.coin.id === focusCoin.id);
+    if (targetData) {
+      const [lon, lat] = targetData.centroid;
+      const targetRotation = [-lon, -lat, 0];
+      
+      const currentRotation = projectionRef.current.rotate();
+      
+      // Interpolate rotation smoothly
+      const svg = d3.select(svgRef.current);
+      
+      // Normalize current rotation longitude to take shortest path
+      let currentLon = currentRotation[0] % 360;
+      let targetLon = targetRotation[0] % 360;
+      
+      if (currentLon - targetLon > 180) {
+         targetLon += 360;
+      } else if (targetLon - currentLon > 180) {
+         currentLon += 360;
+      }
+      
+      d3.transition()
+        .duration(1000)
+        .ease(d3.easeCubicInOut)
+        .tween('rotate', () => {
+          const iLon = d3.interpolate(currentLon, targetLon);
+          const iLat = d3.interpolate(currentRotation[1], targetRotation[1]);
+          return (t) => {
+            const newRot = [iLon(t), iLat(t), 0];
+            projectionRef.current.rotate(newRot);
+            setRotation(newRot);
+            renderSceneRef.current();
+          };
+        });
+    }
+  }, [focusCoin, mappedData]);
 
   // Fast live update for prices without rebuilding geometry
   useEffect(() => {
@@ -322,7 +394,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default' }) => {
           cy={dimensions.height / 2} 
           r={Math.min(dimensions.width, dimensions.height) / 2 * 0.9} 
           fill="var(--bg-paper)" 
-          stroke="var(--fg-pencil)"
+          stroke="var(--globe-stroke)"
           strokeWidth="4"
           strokeDasharray="8 4 4 4"
         />

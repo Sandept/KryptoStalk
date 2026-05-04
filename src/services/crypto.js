@@ -55,7 +55,8 @@ const formatCoinGeckoData = (data) => {
     sparkline: coin.sparkline_in_7d?.price || [],
     volume: coin.total_volume || 0,
     circulatingSupply: coin.circulating_supply || 0,
-    ath: coin.ath || 0
+    ath: coin.ath || 0,
+    image: coin.image || `https://api.dicebear.com/7.x/initials/svg?seed=${coin.symbol}`
   }));
 };
 
@@ -70,6 +71,7 @@ const formatCoinloreData = (data) => {
     sparkline: [], // Coinlore doesn't provide sparkline in this endpoint
     volume: parseFloat(coin.volume24) || 0,
     circulatingSupply: parseFloat(coin.csupply) || 0,
-    ath: 0
+    ath: 0,
+    image: `https://assets.coincap.io/assets/icons/${coin.symbol.toLowerCase()}@2x.png`
   }));
 };

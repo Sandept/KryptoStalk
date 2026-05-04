@@ -18,17 +18,155 @@ const TerminalHeader = ({ coins, globeStyle, setGlobeStyle, currency, setCurrenc
     }
   };
 
-  const headerStyle = {
-    ...styles.header,
-    padding: isMobile ? '0 10px' : '0 24px',
+  const styles = {
+    headerWrapper: {
+      padding: isMobile ? '12px 12px 0 12px' : '16px 16px 0 16px',
+      zIndex: 10,
+    },
+    header: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: isMobile ? '0 10px' : '0 24px',
+      height: '70px',
+      backgroundColor: 'var(--bg-paper)',
+      border: '4px solid var(--fg-pencil)',
+      borderRadius: 'var(--border-wobbly-alt)',
+      boxShadow: 'var(--shadow-hard)',
+      transform: 'rotate(-1deg)',
+      position: 'relative',
+      transition: 'background-color 0.3s',
+      overflow: 'hidden', // Ensure content doesn't bleed out
+    },
+    logoContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      flexShrink: 0,
+    },
+    logoContainerMobile: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: '8px',
+    },
+    logoMark: {
+      width: isMobile ? '36px' : '32px',
+      height: isMobile ? '36px' : '32px',
+      backgroundColor: 'var(--accent-red)',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'var(--font-heading)',
+      fontSize: isMobile ? '20px' : '24px',
+      fontWeight: 'bold',
+      borderRadius: 'var(--border-wobbly)',
+      border: '2px solid var(--fg-pencil)',
+      transform: 'rotate(5deg)',
+    },
+    title: {
+      fontSize: '28px',
+      color: 'var(--fg-pencil)',
+      margin: 0,
+      textDecoration: 'underline wavy var(--accent-blue) 2px',
+      textUnderlineOffset: '6px',
+    },
+    tickerContainer: {
+      flex: 1,
+      overflow: 'hidden',
+      display: 'flex',
+      alignItems: 'center',
+      borderLeft: '3px dashed var(--fg-pencil)',
+      borderRight: '3px dashed var(--fg-pencil)',
+      margin: '0 24px',
+      height: '80%',
+      position: 'relative',
+      whiteSpace: 'nowrap',
+      maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+      WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+    },
+    tickerWrapper: {
+      display: 'flex',
+      gap: '32px',
+      animation: 'ticker 30s linear infinite',
+    },
+    tickerItem: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      fontFamily: 'var(--font-body)',
+      fontSize: '20px',
+    },
+    tickerSymbol: {
+      color: 'var(--fg-pencil)',
+      fontWeight: 'bold',
+      textDecoration: 'underline solid 2px',
+    },
+    tickerPrice: {
+      fontFamily: 'var(--font-mono)',
+      fontSize: '16px',
+    },
+    tickerChange: {
+      fontSize: '18px',
+    },
+    controlsContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      position: 'relative',
+      height: '45px',
+      padding: isMobile ? '0 8px' : '0 12px',
+      backgroundColor: 'var(--bg-postit)',
+      border: '2px solid var(--fg-pencil)',
+      borderRadius: 'var(--border-wobbly)',
+      transform: 'rotate(1deg)',
+      flex: 1,
+      maxWidth: isMobile ? 'calc(100% - 45px)' : 'auto',
+      gap: isMobile ? '4px' : '8px',
+    },
+    tapeStrip: {
+      position: 'absolute',
+      top: '-10px',
+      left: '50%',
+      transform: 'translateX(-50%) rotate(-4deg)',
+      width: '40px',
+      height: '15px',
+      backgroundColor: 'var(--tape-bg)',
+      backdropFilter: 'blur(2px)',
+      zIndex: 2,
+    },
+    styleSelect: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: isMobile ? '14px' : '18px',
+      color: 'var(--accent-red)',
+      backgroundColor: 'transparent',
+      border: 'none',
+      outline: 'none',
+      cursor: 'pointer',
+      appearance: 'none',
+      paddingRight: isMobile ? '2px' : '10px',
+      fontWeight: 'bold',
+    },
+    themeToggle: {
+      background: 'none',
+      border: 'none',
+      fontSize: isMobile ? '18px' : '22px',
+      cursor: 'pointer',
+      padding: '0 5px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'transform 0.2s',
+    }
   };
 
   return (
     <header style={styles.headerWrapper}>
-      <div style={headerStyle}>
+      <div style={styles.header}>
         <div style={isMobile ? styles.logoContainerMobile : styles.logoContainer}>
           <div 
-            style={{...styles.logoMark, cursor: 'pointer', width: isMobile ? '45px' : '32px', height: isMobile ? '45px' : '32px'}} 
+            style={{...styles.logoMark, cursor: 'pointer'}} 
             onClick={() => window.location.reload()}
             title="Refresh Web App"
           >
@@ -86,148 +224,6 @@ const TerminalHeader = ({ coins, globeStyle, setGlobeStyle, currency, setCurrenc
       </div>
     </header>
   );
-};
-
-const styles = {
-  headerWrapper: {
-    padding: '16px 16px 0 16px',
-    zIndex: 10,
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 24px',
-    height: '70px',
-    backgroundColor: 'var(--bg-paper)',
-    border: '4px solid var(--fg-pencil)',
-    borderRadius: 'var(--border-wobbly-alt)',
-    boxShadow: 'var(--shadow-hard)',
-    transform: 'rotate(-1deg)', // Playful rotation
-    position: 'relative',
-    transition: 'background-color 0.3s',
-  },
-  logoContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    flexShrink: 0,
-  },
-  logoContainerMobile: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: '5px',
-  },
-  logoMark: {
-    width: '32px',
-    height: '32px',
-    backgroundColor: 'var(--accent-red)',
-    color: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'var(--font-heading)',
-    fontSize: '24px',
-    fontWeight: 'bold',
-    borderRadius: 'var(--border-wobbly)',
-    border: '2px solid var(--fg-pencil)',
-    transform: 'rotate(5deg)',
-  },
-  title: {
-    fontSize: '28px',
-    color: 'var(--fg-pencil)',
-    margin: 0,
-    textDecoration: 'underline wavy var(--accent-blue) 2px',
-    textUnderlineOffset: '6px',
-  },
-  tickerContainer: {
-    flex: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-    borderLeft: '3px dashed var(--fg-pencil)',
-    borderRight: '3px dashed var(--fg-pencil)',
-    margin: '0 24px',
-    height: '80%',
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    maskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-    WebkitMaskImage: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
-  },
-  tickerWrapper: {
-    display: 'flex',
-    gap: '32px',
-    animation: 'ticker 30s linear infinite',
-  },
-  tickerItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontFamily: 'var(--font-body)',
-    fontSize: '20px', // Larger handwriting
-  },
-  tickerSymbol: {
-    color: 'var(--fg-pencil)',
-    fontWeight: 'bold',
-    textDecoration: 'underline solid 2px',
-  },
-  tickerPrice: {
-    fontFamily: 'var(--font-mono)',
-    fontSize: '16px',
-  },
-  tickerChange: {
-    fontSize: '18px',
-  },
-  controlsContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between', // Changed to between for better spacing
-    position: 'relative',
-    height: '45px',
-    padding: '0 12px',
-    backgroundColor: 'var(--bg-postit)',
-    border: '2px solid var(--fg-pencil)',
-    borderRadius: 'var(--border-wobbly)',
-    transform: 'rotate(1deg)',
-    flex: 1, // Let it grow
-    maxWidth: '100%',
-    gap: '8px',
-  },
-  tapeStrip: {
-    position: 'absolute',
-    top: '-10px',
-    left: '50%',
-    transform: 'translateX(-50%) rotate(-4deg)',
-    width: '40px',
-    height: '15px',
-    backgroundColor: 'var(--tape-bg)',
-    backdropFilter: 'blur(2px)',
-    zIndex: 2,
-  },
-  styleSelect: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: '18px',
-    color: 'var(--accent-red)',
-    backgroundColor: 'transparent',
-    border: 'none',
-    outline: 'none',
-    cursor: 'pointer',
-    appearance: 'none',
-    paddingRight: '10px',
-    fontWeight: 'bold',
-  },
-  themeToggle: {
-    background: 'none',
-    border: 'none',
-    fontSize: '22px',
-    cursor: 'pointer',
-    padding: '0 5px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'transform 0.2s',
-  }
 };
 
 export default TerminalHeader;

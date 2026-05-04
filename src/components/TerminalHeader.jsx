@@ -28,13 +28,13 @@ const TerminalHeader = ({ coins, globeStyle, setGlobeStyle, currency, setCurrenc
       <div style={headerStyle}>
         <div style={isMobile ? styles.logoContainerMobile : styles.logoContainer}>
           <div 
-            style={{...styles.logoMark, cursor: 'pointer', width: isMobile ? '40px' : '32px', height: isMobile ? '40px' : '32px'}} 
+            style={{...styles.logoMark, cursor: 'pointer', width: isMobile ? '45px' : '32px', height: isMobile ? '45px' : '32px'}} 
             onClick={() => window.location.reload()}
             title="Refresh Web App"
           >
             ₿
           </div>
-          <h1 style={{...styles.title, fontSize: isMobile ? '20px' : '28px'}}>KryptoStalk</h1>
+          {!isMobile && <h1 style={styles.title}>KryptoStalk</h1>}
         </div>
         
         {!isMobile && (
@@ -54,7 +54,7 @@ const TerminalHeader = ({ coins, globeStyle, setGlobeStyle, currency, setCurrenc
         )}
         
         <div style={styles.controlsContainer}>
-          <div style={styles.tapeStrip}></div>
+          {!isMobile && <div style={styles.tapeStrip}></div>}
           <select 
             style={styles.styleSelect} 
             value={currency} 
@@ -117,6 +117,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: '5px',
   },
   logoMark: {
     width: '32px',
@@ -181,16 +182,17 @@ const styles = {
   controlsContainer: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between', // Changed to between for better spacing
     position: 'relative',
-    height: '40px',
-    padding: '0 8px',
+    height: '45px',
+    padding: '0 12px',
     backgroundColor: 'var(--bg-postit)',
     border: '2px solid var(--fg-pencil)',
     borderRadius: 'var(--border-wobbly)',
-    transform: 'rotate(2deg)',
-    flexShrink: 0,
-    gap: '4px',
+    transform: 'rotate(1deg)',
+    flex: 1, // Let it grow
+    maxWidth: '100%',
+    gap: '8px',
   },
   tapeStrip: {
     position: 'absolute',

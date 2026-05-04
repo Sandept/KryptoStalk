@@ -25,6 +25,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default', focusCoin })
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [rotation, setRotation] = useState([0, -20, 0]);
   const projectionRef = useRef(null);
   const renderSceneRef = useRef(null);
@@ -41,6 +42,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default', focusCoin })
       if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
         setDimensions({ width, height });
+        setIsMobile(window.innerWidth <= 768);
       }
     };
     handleResize(); // Run once immediately
@@ -118,7 +120,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default', focusCoin })
       })
       .on('drag', (event) => {
         const rotate = projection.rotate();
-        const sensitivity = 0.25; // Drag sensitivity
+        const sensitivity = isMobile ? 0.4 : 0.25; // Increased sensitivity for touch
         
         const dx = event.dx * sensitivity;
         const dy = -event.dy * sensitivity;
@@ -135,7 +137,7 @@ const CryptoGlobe = ({ coins, onSelectCoin, globeStyle = 'default', focusCoin })
         renderScene();
       })
       .on('end', () => {
-        const friction = 0.94; // Momentum falloff (0.0 to 1.0)
+        const friction = isMobile ? 0.97 : 0.94; // Higher friction on mobile for longer glide
         
         inertiaTimer = d3.timer(() => {
           velocity[0] *= friction;
